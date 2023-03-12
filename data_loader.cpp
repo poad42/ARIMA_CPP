@@ -8,31 +8,30 @@
 
 using namespace std;
 
-vector<SunspotEntry> load_dataset(string filename) {
-    vector<SunspotEntry> data;
-    ifstream file(filename);
-    string line;
+std::vector<SunspotEntry> load_dataset(std::string filename) {
+    std::vector<SunspotEntry> data;
+    std::ifstream file(filename);
+    std::string line;
 
-    // Remove the unused variable `line`
-    while (getline(file, line)) {
-        stringstream ss(line);
+    while (std::getline(file, line)) {
+        std::stringstream ss(line);
         int y = 0, m = 0, d = 0, n = 0;
         double dy = 0.0, sn = 0.0, se = 0.0;
-        string value;
+        std::string value;
 
-        if (getline(ss, value, ';')) y = stoi(value);
-        if (getline(ss, value, ';')) m = stoi(value);
-        if (getline(ss, value, ';')) d = stoi(value);
-        if (getline(ss, value, ';')) {
-            if (value == "-nan") continue;  // Skip this row
-            dy = stod(value);
+        if (std::getline(ss, value, ';')) y = std::stoi(value);
+        if (std::getline(ss, value, ';')) m = std::stoi(value);
+        if (std::getline(ss, value, ';')) d = std::stoi(value);
+        if (std::getline(ss, value, ';')) {
+            if (value == "-nan") continue;
+            dy = std::stod(value);
         }
-        if (getline(ss, value, ';')) {
-            if (value == "-nan") continue;  // Skip this row
-            sn = stod(value);
+        if (std::getline(ss, value, ';')) {
+            if (value == "-nan") continue;
+            sn = std::stod(value);
         }
-        if (getline(ss, value, ';')) se = stod(value);
-        if (getline(ss, value, ';')) n = stoi(value);
+        if (std::getline(ss, value, ';')) se = std::stod(value);
+        if (std::getline(ss, value, ';')) n = std::stoi(value);
 
         SunspotEntry entry(y, m, d, dy, sn, se, n);
         data.push_back(entry);

@@ -1,20 +1,26 @@
 CXX = clang++
 CXXFLAGS = -Wall -Wextra -pedantic -std=c++14
-LDFLAGS = -lboost_math_c99 -lboost_math_c99f
+LDLIBS = -lboost_math_c99 -lboost_math_c99f -larmadillo
 
-all: main
+SRCS = main.cpp data_loader.cpp adf_test.cpp arima_modeling.cpp
+OBJS = $(SRCS:.cpp=.o)
+MAIN = main
 
-main: main.o data_loader.o adf_test.o
-	$(CXX) $(CXXFLAGS) $(LDFLAGS) $^ -o $@
+.PHONY: depend clean
 
-main.o: main.cpp data_loader.cpp adf_test.cpp
-	$(CXX) $(CXXFLAGS) -c $< -o $@
+all: $(MAIN)
+	@echo "Build complete."
 
-data_loader.o: data_loader.cpp data_loader.cpp
-	$(CXX) $(CXXFLAGS) -c $< -o $@
+$(MAIN): $(OBJS)
+	$(CXX) $(CXXFLAGS) -o $(MAIN) $(OBJS) $(LDLIBS)
 
-adf_test.o: adf_test.cpp adf_test.cpp
+.cpp.o:
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 
 clean:
-	rm -f *.o main
+	$(RM) *.o $(MAIN)
+
+depend: $(SRCS)
+	makedepend $(INCLUDES) $^
+
+# DO NOT DELETE THIS LINE -- make depend needs it
