@@ -34,26 +34,40 @@ arma::vec pacf(const std::vector<SunspotEntry>& data, int maxlag) {
         x(i) = data[i].SNvalue;
     }
 
-    arma::vec pacf(maxlag+1);
-    arma::mat R(maxlag+1, maxlag+1);
+    arma::vec pacf_vals(maxlag+1, arma::fill::zeros);
+    arma::mat R(maxlag+1, maxlag+1, arma::fill::zeros);
+
+    // Compute autocorrelations for different lags
     for (int i = 0; i <= maxlag; i++) {
-        for (int j = 0; j <= maxlag; j++) {
-            int k = i - j;
-            if (k >= 0) {
-                R(i,j) = x(k);
-            } else {
-                R(i,j) = 0;
-            }
+        for (int j = i; j < n; j++) {
+            R(i, 0) += x[j] * x[j - i];
         }
+        R(i, 0) /= (n - i);
     }
-    pacf(0) = 1;
+
+    // Normalize the first value to 1
+    pacf_vals(0) = 1.0;
+    R(0, 0) = 1.0;
+
+    // Apply the Durbin-Levinson algorithm to solve Yule-Walker equations
     for (int k = 1; k <= maxlag; k++) {
-        arma::mat Rk = R.submat(0, 0, k, k);
-        arma::vec rk = R.submat(0, k, k, maxlag);
-        arma::vec phi = arma::solve(Rk, rk);
-        pacf(k) = phi(k-1);
+        double num = R(k, 0);
+        for (int j = 1; j < k; j++) {
+            num -= R(k - j, 0) * R(j, k - 1);
+        }
+        double den = 1.0;
+        for (int j = 1; j < k; j++) {
+            den -= R(j, 0) * R(j, k - 1);
+        }
+        pacf_vals(k) = num / den;
+
+        for (int j = 1; j < k; j++) {
+            R(j, k) = R(j, k - 1) - pacf_vals(k) * R(k - j, k - 1);
+        }
+        R(k, k) = pacf_vals(k);
     }
-    return pacf;
+
+    return pacf_vals;
 }
 
 std::pair<int, int> get_pq(const std::vector<SunspotEntry>& data) {
